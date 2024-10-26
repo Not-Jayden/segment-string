@@ -111,7 +111,8 @@ describe("Segmentation Functions", () => {
 				" ",
 				"world",
 				"!",
-				" こんにちは",
+				" ",
+				"こんにちは",
 				"世界",
 				"！",
 			]);
