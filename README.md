@@ -29,8 +29,6 @@
 npm install segment-string
 ```
 
-````
-
 ## Getting Started
 
 This library wraps the native `Intl.Segmenter` API, providing a more developer-friendly interface for manipulating strings with granular and locale-aware segments. It’s especially useful for applications needing precise control over segments, such as language-processing tools, UI frameworks, and more.
@@ -193,6 +191,7 @@ Using `segment-string` provides significant benefits over directly working with 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Not-Jayden"><img src="https://avatars.githubusercontent.com/u/16816250?v=4?s=100" width="100px;" alt="Jayden Carey"/><br /><sub><b>Jayden Carey</b></sub></a><br /><a href="https://github.com/Not-Jayden/segment-string/commits?author=Not-Jayden" title="Code">💻</a> <a href="#content-Not-Jayden" title="Content">🖋</a> <a href="https://github.com/Not-Jayden/segment-string/commits?author=Not-Jayden" title="Documentation">📖</a> <a href="#ideas-Not-Jayden" title="Ideas, Planning, & Feedback">🤔</a> <a href="#infra-Not-Jayden" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#maintenance-Not-Jayden" title="Maintenance">🚧</a> <a href="#projectManagement-Not-Jayden" title="Project Management">📆</a> <a href="#tool-Not-Jayden" title
 
 ="Tools">🔧</a></td>
+
 <td align="center" valign="top" width="14.28%"><a href="http://www.joshuakgoldberg.com/"><img src="https://avatars.githubusercontent.com/u/3335181?v=4?s=100" width="100px;" alt="Josh Goldberg ✨"/><br /><sub><b>Josh Goldberg ✨</b></sub></a><br /><a href="#tool-JoshuaKGoldberg" title="Tools">🔧</a></td>
 </tr>
 
@@ -202,4 +201,3 @@ Using `segment-string` provides significant benefits over directly working with 
 ---
 
 > 💙 This package was templated with [`create-typescript-app`](https://github.com/JoshuaKGoldberg/create-typescript-app).
-````
