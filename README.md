@@ -1,4 +1,4 @@
-<h1 align="center">segment-string</h1>
+<h1 align="center">🧩 segment-string</h1>
 
 <p align="center">A lightweight, intuitive wrapper around Intl.Segmenter for seamless segment-aware string operations in TypeScript and JavaScript.</p>
 
@@ -31,7 +31,7 @@ npm install segment-string
 
 ## Getting Started
 
-This library wraps the native `Intl.Segmenter` API, providing a more developer-friendly interface for manipulating strings with granular and locale-aware segments. It’s especially useful for applications needing precise control over segments, such as language-processing tools, UI frameworks, and more.
+`segment-string` is a lightweight wrapper for `Intl.Segmenter`, designed to simplify locale-sensitive text segmentation in JavaScript and TypeScript. It lets you easily split text by graphemes, words, or sentences, ideal for handling complex cases like multi-character emojis or language-specific boundaries.
 
 ```typescript
 import { SegmentString } from "segment-string";
