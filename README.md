@@ -139,7 +139,7 @@ Returns the sentence at a specific index, supporting negative indices.
 
 Returns the raw sentence data at a specific index, supporting negative indices.
 
-### `[Symbol.iterator](): Iterator<string>`
+#### `[Symbol.iterator](): Iterator<string>`
 
 Returns an iterator over the graphemes of the string.
 
