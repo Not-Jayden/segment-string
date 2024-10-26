@@ -107,7 +107,7 @@ console.log("Grapheme count:", text.graphemeCount()); // 17
 console.log("String length:", text.toString().length); // 29
 
 // Accessing a specific word
-const secondWord = text.wordAt(1); // 'world'
+const secondWord = text.wordAt(1, { isWordLike: true }); // 'world'
 console.log(secondWord);
 ```
 
