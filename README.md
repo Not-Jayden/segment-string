@@ -104,7 +104,7 @@ for (const word of text.words()) {
 // Segmenting graphemes and counting
 console.log([...text.graphemes()]); // ['H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!', ' ', '👩‍👩‍👧‍👦', '🌍', '🌈']
 console.log("Grapheme count:", text.graphemeCount()); // 17
-console.log("String length:", text.toString().length); // 26
+console.log("String length:", text.toString().length); // 29
 
 // Accessing a specific word
 const secondWord = text.wordAt(1); // 'world'
