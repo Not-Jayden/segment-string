@@ -1,3 +1,7 @@
+/**
+ * Specifies the level of segmentation for string processing.
+ * Can be 'grapheme', 'word', or 'sentence'.
+ */
 export type Granularity = NonNullable<Intl.SegmenterOptions["granularity"]>;
 
 const segmenterCachesByGranularity: Record<
@@ -43,20 +47,117 @@ function getCachedSegmenter(
 	return segmenter;
 }
 
+/** Options for segmentation methods. */
+type SegmentationOptions = {
+	/** Optional locales to override the default locale for segmentation. */
+	localesOverride?: Intl.LocalesArgument;
+};
+
+/** Options specific to word segmentation methods. */
+type WordSegmentationOptions = SegmentationOptions & {
+	/** If true, filters segments to include only "word-like" segments. */
+	isWordLike?: boolean;
+};
+
 /**
- * Returns the raw segments of a string based on the specified granularity and locale.
+ * Returns the raw segments of a string based on the specified granularity and options.
+ * Supports additional options for 'word' granularity.
  * @param str - The string to segment.
- * @param granularity - Level of segmentation: 'grapheme', 'word', or 'sentence'.
- * @param locales - Optional locales for segmentation.
+ * @param granularity - Level of segmentation ('word').
+ * @param options - Options for word segmentation.
+ * @returns An iterable of `Intl.SegmentData` representing the raw segments.
+ */
+export function getRawSegments(
+	str: string,
+	granularity: "word",
+	options?: WordSegmentationOptions,
+): Iterable<Intl.SegmentData>;
+
+/**
+ * Returns the raw segments of a string based on the specified granularity and options.
+ * @param str - The string to segment.
+ * @param granularity - Level of segmentation ('grapheme' or 'sentence').
+ * @param options - Options for segmentation.
+ * @returns An iterable of `Intl.SegmentData` representing the raw segments.
+ */
+export function getRawSegments(
+	str: string,
+	granularity: Exclude<Granularity, "word">,
+	options?: SegmentationOptions,
+): Intl.Segments;
+
+/**
+ * Returns the raw segments of a string based on the specified granularity and options.
+ * @param str - The string to segment.
+ * @param granularity - Level of segmentation.
+ * @param options - Options for segmentation.
  * @returns An iterable of `Intl.SegmentData` representing the raw segments.
  */
 export function getRawSegments(
 	str: string,
 	granularity: Granularity,
-	locales: Intl.LocalesArgument = undefined,
-): Intl.Segments {
+	options: SegmentationOptions | WordSegmentationOptions = {},
+): Intl.Segments | Iterable<Intl.SegmentData> {
+	const locales = options.localesOverride;
 	const segmenter = getCachedSegmenter(locales, granularity);
-	return segmenter.segment(str);
+	const segments = segmenter.segment(str);
+
+	if (
+		granularity === "word" &&
+		(options as WordSegmentationOptions).isWordLike
+	) {
+		return filterRawWordLikeSegments(segments);
+	} else {
+		return segments;
+	}
+}
+
+/**
+ * Segments a string based on specified granularity and options.
+ * Supports additional options for 'word' granularity.
+ * @param str - The string to segment.
+ * @param granularity - Level of segmentation ('word').
+ * @param options - Options for word segmentation.
+ * @returns An iterable of segments as strings.
+ */
+export function getSegments(
+	str: string,
+	granularity: "word",
+	options?: WordSegmentationOptions,
+): Iterable<string>;
+
+/**
+ * Segments a string based on specified granularity and options.
+ * @param str - The string to segment.
+ * @param granularity - Level of segmentation ('grapheme' or 'sentence').
+ * @param options - Options for segmentation.
+ * @returns An iterable of segments as strings.
+ */
+export function getSegments(
+	str: string,
+	granularity: Exclude<Granularity, "word">,
+	options?: SegmentationOptions,
+): Iterable<string>;
+
+/**
+ * Segments a string based on specified granularity and options.
+ * @param str - The string to segment.
+ * @param granularity - Level of segmentation.
+ * @param options - Options for segmentation.
+ * @returns An iterable of segments as strings.
+ */
+export function getSegments(
+	str: string,
+	granularity: Granularity,
+	options: SegmentationOptions | WordSegmentationOptions = {},
+): Iterable<string> {
+	const segments = getRawSegments(str, granularity, options);
+
+	return (function* () {
+		for (const segmentData of segments) {
+			yield segmentData.segment;
+		}
+	})();
 }
 
 /**
@@ -73,39 +174,6 @@ export function filterRawWordLikeSegments(
 			if (segmentData.isWordLike) {
 				yield segmentData;
 			}
-		}
-	})();
-}
-
-/**
- * Returns an iterable of raw word-like segments from the string.
- * Word-like segments are segments where `isWordLike` is true.
- * @param str - The string to segment.
- * @param locales - Optional locales for segmentation.
- * @returns An iterable of `Intl.SegmentData` for each word-like segment.
- */
-export function getRawWordLikeSegments(
-	str: string,
-	locales: Intl.LocalesArgument = undefined,
-): Iterable<Intl.SegmentData> {
-	const segmenter = getCachedSegmenter(locales, "word");
-	return filterRawWordLikeSegments(segmenter.segment(str));
-}
-
-/**
- * Segments a string based on specified granularity and locale.
- * @param str - The string to segment.
- * @param granularity - Level of segmentation: 'grapheme', 'word', or 'sentence'.
- * @param locales - Optional locales for segmentation.
- */
-export function getSegments(
-	str: string,
-	granularity: Granularity,
-	locales: Intl.LocalesArgument = undefined,
-): Iterable<string> {
-	return (function* () {
-		for (const segmentData of getRawSegments(str, granularity, locales)) {
-			yield segmentData.segment;
 		}
 	})();
 }
@@ -129,34 +197,47 @@ export function filterWordLikeSegments(
 }
 
 /**
- * Returns an iterable of word-like segments from the string.
- * Word-like segments are segments where `isWordLike` is true.
+ * Returns the number of segments in a string for the given granularity and options.
+ * Supports additional options for 'word' granularity.
  * @param str - The string to segment.
- * @param locales - Optional locales for segmentation.
- * @returns An iterable of strings for each word-like segment.
+ * @param granularity - Level of segmentation ('word').
+ * @param options - Options for word segmentation.
+ * @returns The number of segments.
  */
-export function getWordLikeSegments(
+export function segmentCount(
 	str: string,
-	locales: Intl.LocalesArgument = undefined,
-): Iterable<string> {
-	const segmenter = getCachedSegmenter(locales, "word");
-	return filterWordLikeSegments(segmenter.segment(str));
-}
+	granularity: "word",
+	options: WordSegmentationOptions,
+): number;
 
 /**
- * Returns the number of segments in a string for the given granularity and locale.
+ * Returns the number of segments in a string for the given granularity and options.
+ * @param str - The string to segment.
+ * @param granularity - Level of segmentation ('grapheme' or 'sentence').
+ * @param options - Options for segmentation.
+ * @returns The number of segments.
+ */
+export function segmentCount(
+	str: string,
+	granularity: Exclude<Granularity, "word">,
+	options?: SegmentationOptions,
+): number;
+
+/**
+ * Returns the number of segments in a string for the given granularity and options.
  * @param str - The string to segment.
  * @param granularity - Level of segmentation.
- * @param locales - Optional locales for segmentation.
+ * @param options - Options for segmentation.
+ * @returns The number of segments.
  */
 export function segmentCount(
 	str: string,
 	granularity: Granularity,
-	locales: Intl.LocalesArgument = undefined,
+	options: SegmentationOptions | WordSegmentationOptions = {},
 ): number {
 	let count = 0;
 
-	for (const _ of getSegments(str, granularity, locales)) {
+	for (const _ of getSegments(str, granularity, options)) {
 		count++;
 	}
 
@@ -164,53 +245,54 @@ export function segmentCount(
 }
 
 /**
- * Returns the raw segment data at a specific index in the string.
+ * Returns the segment at a specific index in the string.
+ * Supports negative indices (e.g., -1 for the last segment).
+ * Supports additional options for 'word' granularity.
+ * @param str - The string to segment.
+ * @param index - Index of the desired segment (can be negative).
+ * @param granularity - Level of segmentation ('word').
+ * @param options - Options for word segmentation.
+ * @returns The segment at the specified index, or `undefined` if out of bounds.
+ */
+export function segmentAt(
+	str: string,
+	index: number,
+	granularity: "word",
+	options: WordSegmentationOptions,
+): string | undefined;
+
+/**
+ * Returns the segment at a specific index in the string.
+ * Supports negative indices (e.g., -1 for the last segment).
+ * @param str - The string to segment.
+ * @param index - Index of the desired segment (can be negative).
+ * @param granularity - Level of segmentation ('grapheme' or 'sentence').
+ * @param options - Options for segmentation.
+ * @returns The segment at the specified index, or `undefined` if out of bounds.
+ */
+export function segmentAt(
+	str: string,
+	index: number,
+	granularity: Exclude<Granularity, "word">,
+	options?: SegmentationOptions,
+): string | undefined;
+
+/**
+ * Returns the segment at a specific index in the string.
  * Supports negative indices (e.g., -1 for the last segment).
  * @param str - The string to segment.
  * @param index - Index of the desired segment (can be negative).
  * @param granularity - Level of segmentation.
- * @param locales - Optional locales for segmentation.
- * @returns The `Intl.SegmentData` at the specified index, or `undefined` if out of bounds.
- */
-export function rawSegmentAt(
-	str: string,
-	index: number,
-	granularity: Granularity,
-	locales: Intl.LocalesArgument = undefined,
-): Intl.SegmentData | undefined {
-	const segments = getRawSegments(str, granularity, locales);
-
-	if (index < 0) {
-		return [...segments].at(index);
-	}
-
-	let currentIndex = 0;
-
-	for (const segmentData of segments) {
-		if (index === currentIndex) {
-			return segmentData;
-		}
-
-		currentIndex++;
-	}
-
-	return undefined;
-}
-
-/**
- * Returns the segment at a specific index in the string.
- * @param str - The string to segment.
- * @param index - Index of the desired segment.
- * @param granularity - Level of segmentation.
- * @param locales - Optional locales for segmentation.
+ * @param options - Options for segmentation.
+ * @returns The segment at the specified index, or `undefined` if out of bounds.
  */
 export function segmentAt(
 	str: string,
 	index: number,
 	granularity: Granularity,
-	locales: Intl.LocalesArgument = undefined,
+	options: SegmentationOptions | WordSegmentationOptions = {},
 ): string | undefined {
-	const segments = getSegments(str, granularity, locales);
+	const segments = getSegments(str, granularity, options);
 
 	if (index < 0) {
 		return [...segments].at(index);
@@ -229,80 +311,261 @@ export function segmentAt(
 	return undefined;
 }
 
-/** Provides segmentation utilities for strings with caching. */
+/**
+ * A class representing a segmentable string, providing methods to segment it into graphemes, words, or sentences.
+ */
 export class SegmentString {
+	/**
+	 * Creates a new SegmentString instance.
+	 * @param str - The string to be segmented.
+	 * @param locales - Optional locales argument for segmentation.
+	 */
 	constructor(
 		private str: string,
 		private locales: Intl.LocalesArgument = undefined,
 	) {}
 
-	/** Segments the string based on specified granularity and locale. */
+	/**
+	 * Segments the string based on specified granularity and options.
+	 * Supports additional options for 'word' granularity.
+	 * @param granularity - Level of segmentation ('word').
+	 * @param options - Options for word segmentation.
+	 * @returns An iterable of segments as strings.
+	 */
+	segments(
+		granularity: "word",
+		options: WordSegmentationOptions,
+	): Iterable<string>;
+
+	/**
+	 * Segments the string based on specified granularity and options.
+	 * @param granularity - Level of segmentation ('grapheme' or 'sentence').
+	 * @param options - Options for segmentation.
+	 * @returns An iterable of segments as strings.
+	 */
+	segments(
+		granularity: Exclude<Granularity, "word">,
+		options?: SegmentationOptions,
+	): Iterable<string>;
+
+	/**
+	 * Segments the string based on specified granularity and options.
+	 * @param granularity - Level of segmentation.
+	 * @param options - Options for segmentation.
+	 * @returns An iterable of segments as strings.
+	 */
 	segments(
 		granularity: Granularity,
-		locales: Intl.LocalesArgument = this.locales,
+		options: SegmentationOptions | WordSegmentationOptions = {},
 	): Iterable<string> {
-		return getSegments(this.str, granularity, locales);
+		const { localesOverride = this.locales } = options;
+		return getSegments(this.str, granularity, { ...options, localesOverride });
 	}
 
+	/**
+	 * Returns raw segments of the string based on the specified granularity and options.
+	 * Supports additional options for 'word' granularity.
+	 * @param granularity - Level of segmentation ('word').
+	 * @param options - Options for word segmentation.
+	 * @returns An iterable of `Intl.SegmentData` representing the raw segments.
+	 */
+	rawSegments(
+		granularity: "word",
+		options: WordSegmentationOptions,
+	): Iterable<Intl.SegmentData>;
+
+	/**
+	 * Returns raw segments of the string based on the specified granularity and options.
+	 * @param granularity - Level of segmentation ('grapheme' or 'sentence').
+	 * @param options - Options for segmentation.
+	 * @returns An iterable of `Intl.SegmentData` representing the raw segments.
+	 */
+	rawSegments(
+		granularity: Exclude<Granularity, "word">,
+		options?: SegmentationOptions,
+	): Intl.Segments;
+
+	/**
+	 * Returns raw segments of the string based on the specified granularity and options.
+	 * @param granularity - Level of segmentation.
+	 * @param options - Options for segmentation.
+	 * @returns An iterable of `Intl.SegmentData` representing the raw segments.
+	 */
 	rawSegments(
 		granularity: Granularity,
-		locales: Intl.LocalesArgument = this.locales,
-	): Intl.Segments {
-		return getRawSegments(this.str, granularity, locales);
+		options: SegmentationOptions | WordSegmentationOptions = {},
+	): Intl.Segments | Iterable<Intl.SegmentData> {
+		const { localesOverride = this.locales } = options;
+		return getRawSegments(this.str, granularity, {
+			...options,
+			localesOverride,
+		});
 	}
 
-	/** Returns the count of segments based on granularity and locale. */
+	/**
+	 * Returns the count of segments based on granularity and options.
+	 * Supports additional options for 'word' granularity.
+	 * @param granularity - Level of segmentation ('word').
+	 * @param options - Options for word segmentation.
+	 * @returns The number of segments.
+	 */
+	segmentCount(granularity: "word", options: WordSegmentationOptions): number;
+
+	/**
+	 * Returns the count of segments based on granularity and options.
+	 * @param granularity - Level of segmentation ('grapheme' or 'sentence').
+	 * @param options - Options for segmentation.
+	 * @returns The number of segments.
+	 */
+	segmentCount(
+		granularity: Exclude<Granularity, "word">,
+		options?: SegmentationOptions,
+	): number;
+
+	/**
+	 * Returns the count of segments based on granularity and options.
+	 * @param granularity - Level of segmentation.
+	 * @param options - Options for segmentation.
+	 * @returns The number of segments.
+	 */
 	segmentCount(
 		granularity: Granularity,
-		locales: Intl.LocalesArgument = this.locales,
+		options: SegmentationOptions | WordSegmentationOptions = {},
 	): number {
-		return segmentCount(this.str, granularity, locales);
+		const { localesOverride = this.locales } = options;
+		return segmentCount(this.str, granularity, { ...options, localesOverride });
 	}
 
-	/** Returns the segment at a specified index for the given granularity and locale. */
+	/**
+	 * Returns the segment at a specified index for the given granularity and options.
+	 * Supports additional options for 'word' granularity.
+	 * @param index - Index of the desired segment (can be negative).
+	 * @param granularity - Level of segmentation ('word').
+	 * @param options - Options for word segmentation.
+	 * @returns The segment at the specified index, or `undefined` if out of bounds.
+	 */
+	segmentAt(
+		index: number,
+		granularity: "word",
+		options: WordSegmentationOptions,
+	): string | undefined;
+
+	/**
+	 * Returns the segment at a specified index for the given granularity and options.
+	 * @param index - Index of the desired segment (can be negative).
+	 * @param granularity - Level of segmentation ('grapheme' or 'sentence').
+	 * @param options - Options for segmentation.
+	 * @returns The segment at the specified index, or `undefined` if out of bounds.
+	 */
+	segmentAt(
+		index: number,
+		granularity: Exclude<Granularity, "word">,
+		options?: SegmentationOptions,
+	): string | undefined;
+
+	/**
+	 * Returns the segment at a specified index for the given granularity and options.
+	 * @param index - Index of the desired segment (can be negative).
+	 * @param granularity - Level of segmentation.
+	 * @param options - Options for segmentation.
+	 * @returns The segment at the specified index, or `undefined` if out of bounds.
+	 */
 	segmentAt(
 		index: number,
 		granularity: Granularity,
-		locales: Intl.LocalesArgument = this.locales,
+		options: SegmentationOptions | WordSegmentationOptions = {},
 	): string | undefined {
-		return segmentAt(this.str, index, granularity, locales);
+		const { localesOverride = this.locales } = options;
+		return segmentAt(this.str, index, granularity, {
+			...options,
+			localesOverride,
+		});
 	}
 
-	toString(): string {
-		return this.str;
-	}
-}
-
-/** Provides grapheme segmentation utilities for strings. */
-export class GraphemeString {
-	private segmentString: SegmentString;
-	private locales: Intl.LocalesArgument;
-
-	constructor(str: string, locales?: Intl.LocalesArgument) {
-		this.locales = locales;
-		this.segmentString = new SegmentString(str, locales);
+	/** Returns an iterable of graphemes based on the options. */
+	graphemes(options: SegmentationOptions = {}): Iterable<string> {
+		return this.segments("grapheme", options);
 	}
 
-	/** Returns an array of graphemes based on the locale. */
-	graphemes(locales: Intl.LocalesArgument = this.locales): Iterable<string> {
-		return this.segmentString.segments("grapheme", locales);
+	/** Returns raw grapheme segments of the string based on the specified options. */
+	rawGraphemes(options: SegmentationOptions = {}): Intl.Segments {
+		return this.rawSegments("grapheme", options);
 	}
 
-	rawGraphemes(locales: Intl.LocalesArgument = this.locales): Intl.Segments {
-		return this.segmentString.rawSegments("grapheme", locales);
+	/** Returns the count of graphemes for the specified options. */
+	graphemeCount(options: SegmentationOptions = {}): number {
+		return this.segmentCount("grapheme", options);
 	}
 
-	/** Returns the count of graphemes for the specified locale. */
-	graphemeCount(locales: Intl.LocalesArgument = this.locales): number {
-		return this.segmentString.segmentCount("grapheme", locales);
-	}
-
-	/** Returns the grapheme at a specific index for the given locale. */
+	/** Returns the grapheme at a specific index for the given options. */
 	graphemeAt(
 		index: number,
-		locales: Intl.LocalesArgument = this.locales,
+		options: SegmentationOptions = {},
 	): string | undefined {
-		return this.segmentString.segmentAt(index, "grapheme", locales);
+		return this.segmentAt(index, "grapheme", options);
+	}
+
+	/**
+	 * Returns an iterable of word segments based on the specified options.
+	 * @param options - Options for word segmentation.
+	 * @returns An iterable of strings, each representing a word segment based on the options.
+	 */
+	words(options: WordSegmentationOptions = {}): Iterable<string> {
+		return this.segments("word", options);
+	}
+
+	/**
+	 * Returns an iterable of raw word segments based on the specified options.
+	 * @param options - Options for word segmentation.
+	 * @returns An iterable of `Intl.SegmentData` objects, each representing detailed data for a word segment.
+	 */
+	rawWords(options: WordSegmentationOptions = {}): Iterable<Intl.SegmentData> {
+		return this.rawSegments("word", options);
+	}
+
+	/**
+	 * Returns the count of words for the specified options.
+	 * @param options - Options for word segmentation.
+	 * @returns The number of word segments.
+	 */
+	wordCount(options: WordSegmentationOptions = {}): number {
+		return this.segmentCount("word", options);
+	}
+
+	/**
+	 * Returns the word at a specific index for the given options.
+	 * @param index - Index of the desired word (can be negative).
+	 * @param options - Options for word segmentation.
+	 * @returns The word at the specified index, or `undefined` if out of bounds.
+	 */
+	wordAt(
+		index: number,
+		options: WordSegmentationOptions = {},
+	): string | undefined {
+		return this.segmentAt(index, "word", options);
+	}
+
+	/** Returns an iterable of sentences based on the options. */
+	sentences(options: SegmentationOptions = {}): Iterable<string> {
+		return this.segments("sentence", options);
+	}
+
+	/** Returns raw sentence segments of the string based on the specified options. */
+	rawSentences(options: SegmentationOptions = {}): Intl.Segments {
+		return this.rawSegments("sentence", options);
+	}
+
+	/** Returns the count of sentences for the specified options. */
+	sentenceCount(options: SegmentationOptions = {}): number {
+		return this.segmentCount("sentence", options);
+	}
+
+	/** Returns the sentence at a specific index for the given options. */
+	sentenceAt(
+		index: number,
+		options: SegmentationOptions = {},
+	): string | undefined {
+		return this.segmentAt(index, "sentence", options);
 	}
 
 	[Symbol.iterator](): Iterator<string> {
@@ -314,145 +577,6 @@ export class GraphemeString {
 	}
 
 	toString(): string {
-		return this.segmentString.toString();
-	}
-}
-
-type WordsOptions = {
-	isWordLike?: boolean;
-};
-
-/** Provides word segmentation utilities for strings. */
-export class WordString {
-	private segmentString: SegmentString;
-	private locales: Intl.LocalesArgument;
-
-	constructor(str: string, locales?: Intl.LocalesArgument) {
-		this.locales = locales;
-		this.segmentString = new SegmentString(str, locales);
-	}
-
-	/**
-	 * Returns an iterable of raw word segments based on the specified locale, with an optional filter
-	 * to include only "word-like" segments. Raw word segments include the detailed segment data provided
-	 * by `Intl.Segmenter`, such as `isWordLike`, `index`, and `segment` properties.
-	 *
-	 * @param locales - The locale(s) to use for segmentation. Defaults to the instance's locale.
-	 * @param options - Optional configuration for segmentation.
-	 * @param options.isWordLike - If `true`, filters segments to include only "word-like" segments.
-	 *                             "Word-like" segments are those marked by the `Intl.Segmenter` API
-	 *                             as containing actual word content, excluding punctuation or whitespace.
-	 * @returns An iterable of `Intl.SegmentData` objects, each representing detailed data for a word segment.
-	 *
-	 * @example
-	 * const wordString = new WordString("Hello, world!");
-	 * const rawSegments = [...wordString.rawWords(undefined, { isWordLike: true })];
-	 * console.log(rawSegments.map(segment => segment.segment));
-	 * // Output: ["Hello", "world"]
-	 */
-	rawWords(
-		locales: Intl.LocalesArgument = this.locales,
-		options: WordsOptions = {},
-	): Iterable<Intl.SegmentData> {
-		const segments = this.segmentString.rawSegments("word", locales);
-		return options.isWordLike ? filterRawWordLikeSegments(segments) : segments;
-	}
-
-	/**
-	 * Returns an iterable of word segments based on the specified locale, with an optional filter
-	 * to include only "word-like" segments (segments identified as individual words).
-	 *
-	 * @param locales - The locale(s) to use for segmentation. Defaults to the instance's locale.
-	 * @param options - Optional configuration for segmentation.
-	 * @param options.isWordLike - If `true`, filters segments to include only "word-like" segments.
-	 *                             "Word-like" segments are those marked by the `Intl.Segmenter` API
-	 *                             as containing actual word content, excluding punctuation or whitespace.
-	 * @returns An iterable of strings, each representing a word segment based on the locale.
-	 *
-	 * @example
-	 * const wordString = new WordString("Hello, world!");
-	 * console.log([...wordString.words(undefined, { isWordLike: true })]);
-	 * // Output: ["Hello", "world"]
-	 */
-	words(
-		locales: Intl.LocalesArgument = this.locales,
-		options: WordsOptions = {},
-	): Iterable<string> {
-		const segments = this.rawWords(locales, options);
-		return function* () {
-			for (const segmentData of segments) {
-				yield segmentData.segment;
-			}
-		}.call(this);
-	}
-
-	/** Returns the count of words for the specified locale. */
-	wordCount(locales: Intl.LocalesArgument = this.locales): number {
-		return this.segmentString.segmentCount("word", locales);
-	}
-
-	/** Returns the word at a specific index for the given locale. */
-	wordAt(
-		index: number,
-		locales: Intl.LocalesArgument = this.locales,
-	): string | undefined {
-		return this.segmentString.segmentAt(index, "word", locales);
-	}
-
-	[Symbol.iterator](): Iterator<string> {
-		return this.words()[Symbol.iterator]();
-	}
-
-	[Symbol.toPrimitive](hint: "string" | "number" | "default"): string | number {
-		return hint === "string" || hint === "default" ? this.toString() : NaN;
-	}
-
-	toString(): string {
-		return this.segmentString.toString();
-	}
-}
-
-/** Provides sentence segmentation utilities for strings. */
-export class SentenceString {
-	private segmentString: SegmentString;
-	private locales: Intl.LocalesArgument;
-
-	constructor(str: string, locales?: Intl.LocalesArgument) {
-		this.locales = locales;
-		this.segmentString = new SegmentString(str, locales);
-	}
-
-	/** Returns an array of sentences based on the locale. */
-	sentences(locales: Intl.LocalesArgument = this.locales): Iterable<string> {
-		return this.segmentString.segments("sentence", locales);
-	}
-
-	rawSentences(locales: Intl.LocalesArgument = this.locales): Intl.Segments {
-		return this.segmentString.rawSegments("sentence", locales);
-	}
-
-	/** Returns the count of sentences for the specified locale. */
-	sentenceCount(locales: Intl.LocalesArgument = this.locales): number {
-		return this.segmentString.segmentCount("sentence", locales);
-	}
-
-	/** Returns the sentence at a specific index for the given locale. */
-	sentenceAt(
-		index: number,
-		locales: Intl.LocalesArgument = this.locales,
-	): string | undefined {
-		return this.segmentString.segmentAt(index, "sentence", locales);
-	}
-
-	[Symbol.iterator](): Iterator<string> {
-		return this.sentences()[Symbol.iterator]();
-	}
-
-	[Symbol.toPrimitive](hint: "string" | "number" | "default"): string | number {
-		return hint === "string" || hint === "default" ? this.toString() : NaN;
-	}
-
-	toString(): string {
-		return this.segmentString.toString();
+		return this.str;
 	}
 }
