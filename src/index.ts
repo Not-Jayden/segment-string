@@ -50,7 +50,7 @@ function getCachedSegmenter(
 /** Base options for segmentation methods. */
 type SegmentationOptionsBase = {
 	/** Optional locales to override the default locale for segmentation. */
-	localesOverride?: Intl.LocalesArgument;
+	locales?: Intl.LocalesArgument;
 };
 
 /** Options specific to word segmentation methods. */
@@ -81,7 +81,7 @@ export function getRawSegments<TGranularity extends Granularity>(
 	granularity: TGranularity,
 	options: SegmentationOptions<TGranularity> = {},
 ): Iterable<Intl.SegmentData> {
-	const locales = options.localesOverride;
+	const locales = options.locales;
 	const segmenter = getCachedSegmenter(locales, granularity);
 	const segments = segmenter.segment(str);
 
@@ -235,8 +235,8 @@ export class SegmentString {
 		granularity: TGranularity,
 		options: SegmentationOptions<TGranularity> = {},
 	): Iterable<string> {
-		const localesOverride = options.localesOverride ?? this.locales;
-		return getSegments(this.str, granularity, { ...options, localesOverride });
+		const locales = options.locales ?? this.locales;
+		return getSegments(this.str, granularity, { ...options, locales });
 	}
 
 	/**
@@ -250,10 +250,10 @@ export class SegmentString {
 		granularity: TGranularity,
 		options: SegmentationOptions<TGranularity> = {},
 	): Iterable<Intl.SegmentData> {
-		const localesOverride = options.localesOverride ?? this.locales;
+		const locales = options.locales ?? this.locales;
 		return getRawSegments(this.str, granularity, {
 			...options,
-			localesOverride,
+			locales,
 		});
 	}
 
@@ -268,8 +268,11 @@ export class SegmentString {
 		granularity: TGranularity,
 		options: SegmentationOptions<TGranularity> = {},
 	): number {
-		const localesOverride = options.localesOverride ?? this.locales;
-		return segmentCount(this.str, granularity, { ...options, localesOverride });
+		const locales = options.locales ?? this.locales;
+		return segmentCount(this.str, granularity, {
+			...options,
+			locales,
+		});
 	}
 
 	/**
@@ -285,10 +288,10 @@ export class SegmentString {
 		granularity: TGranularity,
 		options: SegmentationOptions<TGranularity> = {},
 	): string | undefined {
-		const localesOverride = options.localesOverride ?? this.locales;
+		const locales = options.locales ?? this.locales;
 		return segmentAt(this.str, index, granularity, {
 			...options,
-			localesOverride,
+			locales,
 		});
 	}
 

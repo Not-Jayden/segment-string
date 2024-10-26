@@ -131,7 +131,7 @@ function getRawSegments(
 - **Parameters**:
   - `str`: The string to segment.
   - `granularity`: Specifies the segmentation level (`'grapheme'`, `'word'`, or `'sentence'`).
-  - `options`: Includes `localesOverride` for specifying locale and `isWordLike` for filtering word-like segments.
+  - `options`: Includes `locales` for specifying locale and `isWordLike` for filtering word-like segments.
 - **Returns**: An iterable of raw `Intl.SegmentData`.
 
 ### `getSegments`
