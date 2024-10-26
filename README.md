@@ -167,8 +167,6 @@ const secondWord = text.wordAt(1, { isWordLike: true }); // 'world'
 console.log(secondWord);
 ```
 
-The above example demonstrates how `graphemeCount` counts visual units (graphemes), which differ from the raw `string.length` due to multi-codepoint emoji.
-
 ---
 
 ## Individual Functions
