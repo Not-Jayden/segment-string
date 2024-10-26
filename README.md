@@ -36,73 +36,11 @@ This library wraps the native `Intl.Segmenter` API, providing a more developer-f
 ```typescript
 import { SegmentString } from "segment-string";
 
-const str = new SegmentString("Hello, world! こんにちは世界！");
+const str = new SegmentString("Hello, world! 👩‍👩‍👧‍👦🌍🌈");
 
 // Segment by grapheme
-console.log([...str.graphemes()]); // ['H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!', ' ', 'こ', 'ん', 'に', 'ち', 'は', '世', '界', '！']
+console.log([...str.graphemes()]); // ['H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!', ' ', '👩‍👩‍👧‍👦', '🌍', '🌈']
 ```
-
-## API Documentation
-
-### 1. `getRawSegments`
-
-```typescript
-function getRawSegments(
-	str: string,
-	granularity: Granularity,
-	options?: SegmentationOptions | WordSegmentationOptions,
-): Intl.Segments | Iterable<Intl.SegmentData>;
-```
-
-- **Description**: Returns raw `Intl.SegmentData` objects based on granularity and options.
-- **Parameters**:
-  - `str`: The string to segment.
-  - `granularity`: Specifies the segmentation level (`'grapheme'`, `'word'`, or `'sentence'`).
-  - `options`: Includes `localesOverride` for specifying locale and `isWordLike` for filtering word-like segments.
-- **Returns**: An iterable of raw `Intl.SegmentData`.
-
-### 2. `getSegments`
-
-```typescript
-function getSegments(
-	str: string,
-	granularity: Granularity,
-	options?: SegmentationOptions | WordSegmentationOptions,
-): Iterable<string>;
-```
-
-- **Description**: Returns segments of the string as plain strings.
-- **Parameters**: Similar to `getRawSegments`.
-- **Returns**: An iterable of segments as strings.
-
-### 3. `segmentCount`
-
-```typescript
-function segmentCount(
-	str: string,
-	granularity: Granularity,
-	options?: SegmentationOptions | WordSegmentationOptions,
-): number;
-```
-
-- **Description**: Returns the count of segments based on granularity and options.
-- **Parameters**: Similar to `getRawSegments`.
-- **Returns**: Number of segments.
-
-### 4. `segmentAt`
-
-```typescript
-function segmentAt(
-	str: string,
-	index: number,
-	granularity: Granularity,
-	options?: SegmentationOptions | WordSegmentationOptions,
-): string | undefined;
-```
-
-- **Description**: Returns the segment at a specified index, supporting negative indices.
-- **Parameters**: Similar to `getRawSegments`, plus an `index` parameter.
-- **Returns**: The segment at the specified index or `undefined` if out of bounds.
 
 ---
 
@@ -149,26 +87,119 @@ Returns an iterable of word segments, with optional filtering for word-like segm
 
 Returns an iterable of sentence segments.
 
-#### Example Usage
+---
+
+## Example Usage
 
 ```typescript
 import { SegmentString } from "segment-string";
 
-const text = new SegmentString("Hello, world! こんにちは世界！");
+const text = new SegmentString("Hello, world! 👩‍👩‍👧‍👦🌍🌈");
 
 // Segmenting by words
 for (const word of text.words()) {
-	console.log(word); // 'Hello', ',', ' ', 'world', '!', ' こんにちは世界！'
+	console.log(word); // 'Hello', ',', ' ', 'world', '!', ' 👩‍👩‍👧‍👦🌍🌈'
 }
 
 // Segmenting graphemes and counting
-const graphemeCount = text.graphemeCount();
-console.log(graphemeCount); // 23
+console.log([...text.graphemes()]); // ['H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!', ' ', '👩‍👩‍👧‍👦', '🌍', '🌈']
+console.log("Grapheme count:", text.graphemeCount()); // 17
+console.log("String length:", text.toString().length); // 26
 
 // Accessing a specific word
 const secondWord = text.wordAt(1); // 'world'
 console.log(secondWord);
 ```
+
+The above example demonstrates how `graphemeCount` counts visual units (graphemes), which differ from the raw `string.length` due to multi-codepoint emoji.
+
+---
+
+## Individual Functions
+
+### `getRawSegments`
+
+```typescript
+function getRawSegments(
+	str: string,
+	granularity: Granularity,
+	options?: SegmentationOptions | WordSegmentationOptions,
+): Intl.Segments | Iterable<Intl.SegmentData>;
+```
+
+- **Description**: Returns raw `Intl.SegmentData` objects based on granularity and options.
+- **Parameters**:
+  - `str`: The string to segment.
+  - `granularity`: Specifies the segmentation level (`'grapheme'`, `'word'`, or `'sentence'`).
+  - `options`: Includes `localesOverride` for specifying locale and `isWordLike` for filtering word-like segments.
+- **Returns**: An iterable of raw `Intl.SegmentData`.
+
+### `getSegments`
+
+```typescript
+function getSegments(
+	str: string,
+	granularity: Granularity,
+	options?: SegmentationOptions | WordSegmentationOptions,
+): Iterable<string>;
+```
+
+- **Description**: Returns segments of the string as plain strings.
+- **Parameters**: Similar to `getRawSegments`.
+- **Returns**: An iterable of segments as strings.
+
+### `segmentCount`
+
+```typescript
+function segmentCount(
+	str: string,
+	granularity: Granularity,
+	options?: SegmentationOptions | WordSegmentationOptions,
+): number;
+```
+
+- **Description**: Returns the count of segments based on granularity and options.
+- **Parameters**: Similar to `getRawSegments`.
+- **Returns**: Number of segments.
+
+### `segmentAt`
+
+```typescript
+function segmentAt(
+	str: string,
+	index: number,
+	granularity: Granularity,
+	options?: SegmentationOptions | WordSegmentationOptions,
+): string | undefined;
+```
+
+- **Description**: Returns the segment at a specified index, supporting negative indices.
+- **Parameters**: Similar to `getRawSegments`, plus an `index` parameter.
+- **Returns**: The segment at the specified index or `undefined` if out of bounds.
+
+### `filterRawWordLikeSegments`
+
+```typescript
+function filterRawWordLikeSegments(
+	segments: Intl.Segments,
+): Iterable<Intl.SegmentData>;
+```
+
+- **Description**: Filters and returns an iterable of raw word-like segment data where `isWordLike` is true.
+- **Parameters**:
+  - `segments`: The segments to filter.
+- **Returns**: An iterable of `Intl.SegmentData` for each word-like segment.
+
+### `filterWordLikeSegments`
+
+```typescript
+function filterWordLikeSegments(segments: Intl.Segments): Iterable<string>;
+```
+
+- **Description**: Filters and returns an iterable of word-like segments as strings where `isWordLike` is true.
+- **Parameters**:
+  - `segments`: The segments to filter.
+- **Returns**: An iterable of strings for each word-like segment.
 
 ---
 
