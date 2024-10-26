@@ -3,6 +3,8 @@ import {
 	getSegments,
 	segmentCount,
 	segmentAt,
+	filterRawWordLikeSegments,
+	filterWordLikeSegments,
 	SegmentString,
 } from "./index.js";
 
@@ -174,6 +176,24 @@ describe("Segmentation Functions", () => {
 		it("should return undefined for out-of-bounds index", () => {
 			const segment = segmentAt(testString, 100, "word");
 			expect(segment).toBeUndefined();
+		});
+	});
+
+	describe("filterRawWordLikeSegments", () => {
+		it("should filter raw word-like segments", () => {
+			const segments = getRawSegments(testString, "word", { isWordLike: true });
+			const filteredSegments = filterRawWordLikeSegments(segments);
+			const result = [...filteredSegments].map((s) => s.segment);
+			expect(result).toEqual(["Hello", "world", "こんにちは", "世界"]);
+		});
+	});
+
+	describe("filterWordLikeSegments", () => {
+		it("should filter word-like segments", () => {
+			const segments = getRawSegments(testString, "word", { isWordLike: true });
+			const filteredSegments = filterWordLikeSegments(segments);
+			const result = [...filteredSegments];
+			expect(result).toEqual(["Hello", "world", "こんにちは", "世界"]);
 		});
 	});
 });
