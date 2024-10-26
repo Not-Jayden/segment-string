@@ -75,7 +75,7 @@ Counts segments in the string based on the specified granularity.
 
 Retrieves the segment at a specific index, supporting negative indices.
 
-### `rawSegmentAt(index: number, granularity: Granularity, options?: SegmentationOptions | WordSegmentationOptions): Intl.SegmentData | undefined`
+#### `rawSegmentAt(index: number, granularity: Granularity, options?: SegmentationOptions | WordSegmentationOptions): Intl.SegmentData | undefined`
 
 Returns the raw segment data at a specific index, supporting negative indices.
 
