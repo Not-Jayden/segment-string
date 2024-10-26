@@ -75,17 +75,69 @@ Counts segments in the string based on the specified granularity.
 
 Retrieves the segment at a specific index, supporting negative indices.
 
+### `rawSegmentAt(index: number, granularity: Granularity, options?: SegmentationOptions | WordSegmentationOptions): Intl.SegmentData | undefined`
+
+Returns the raw segment data at a specific index, supporting negative indices.
+
 #### `graphemes(options?: SegmentationOptions): Iterable<string>`
 
 Returns an iterable of grapheme segments as strings.
+
+#### `rawGraphemes(options?: SegmentationOptions): Iterable<Intl.SegmentData>`
+
+Returns an iterable of raw grapheme segments.
+
+#### `graphemeCount(options?: SegmentationOptions): number`
+
+Counts grapheme segments in the string.
+
+#### `graphemeAt(index: number, options?: SegmentationOptions): string | undefined`
+
+Returns the grapheme at a specific index, supporting negative indices.
+
+#### `rawGraphemeAt(index: number, options?: SegmentationOptions): Intl.SegmentData | undefined`
+
+Returns the raw grapheme data at a specific index, supporting negative indices.
 
 #### `words(options?: WordSegmentationOptions): Iterable<string>`
 
 Returns an iterable of word segments, with optional filtering for word-like segments.
 
+#### `rawWords(options?: WordSegmentationOptions): Iterable<Intl.SegmentData>`
+
+Returns an iterable of raw word segments, with optional filtering for word-like segments.
+
+#### `wordCount(options?: WordSegmentationOptions): number`
+
+Counts word segments in the string.
+
+#### `wordAt(index: number, options?: WordSegmentationOptions): string | undefined`
+
+Returns the word at a specific index, supporting negative indices.
+
+#### `rawWordAt(index: number, options?: WordSegmentationOptions): Intl.SegmentData | undefined`
+
+Returns the raw word data at a specific index, supporting negative indices.
+
 #### `sentences(options?: SegmentationOptions): Iterable<string>`
 
 Returns an iterable of sentence segments.
+
+#### `rawSentences(options?: SegmentationOptions): Iterable<Intl.SegmentData>`
+
+Returns an iterable of raw sentence segments.
+
+#### `sentenceCount(options?: SegmentationOptions): number`
+
+Counts sentence segments in the string.
+
+#### `sentenceAt(index: number, options?: SegmentationOptions): string | undefined`
+
+Returns the sentence at a specific index, supporting negative indices.
+
+#### `rawSentenceAt(index: number, options?: SegmentationOptions): Intl.SegmentData | undefined`
+
+Returns the raw sentence data at a specific index, supporting negative indices.
 
 ---
 
@@ -161,6 +213,21 @@ function segmentCount(
 - **Description**: Returns the count of segments based on granularity and options.
 - **Parameters**: Similar to `getRawSegments`.
 - **Returns**: Number of segments.
+
+### `rawSegmentAt`
+
+```typescript
+function rawSegmentAt(
+	str: string,
+	index: number,
+	granularity: Granularity,
+	options?: SegmentationOptions | WordSegmentationOptions,
+): Intl.SegmentData | undefined;
+```
+
+- **Description**: Returns the raw segment data at a specified index, supporting negative indices.
+- **Parameters**: Similar to `getRawSegments`, plus an `index` parameter.
+- **Returns**: The `Intl.SegmentData` at the specified index, or `undefined` if out of bounds.
 
 ### `segmentAt`
 
