@@ -168,6 +168,7 @@ export function segmentCount<TGranularity extends Granularity>(
 ): number {
 	let count = 0;
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	for (const _ of getSegments(str, granularity, options)) {
 		count++;
 	}

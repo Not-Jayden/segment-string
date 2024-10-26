@@ -376,6 +376,7 @@ describe("SegmentString Class", () => {
 		});
 
 		it("should return the original string when used in a template literal", () => {
+			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 			expect(`${testString}`).toBe("Hello, world! こんにちは世界！");
 		});
 
@@ -430,6 +431,7 @@ describe("SegmentString Class", () => {
 
 		it("should convert to a string", () => {
 			expect(testString.toString()).toBe(rawTestString);
+			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 			expect(`${testString}`).toBe(rawTestString);
 		});
 	});
