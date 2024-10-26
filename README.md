@@ -31,7 +31,7 @@ npm install segment-string
 
 ## Getting Started
 
-`segment-string` is a lightweight wrapper for `Intl.Segmenter`, designed to simplify locale-sensitive text segmentation in JavaScript and TypeScript. It lets you easily split text by graphemes, words, or sentences, ideal for handling complex cases like multi-character emojis or language-specific boundaries.
+`segment-string` is a lightweight wrapper for `Intl.Segmenter`, designed to simplify locale-sensitive text segmentation in JavaScript and TypeScript. It lets you easily segment and manipulate text by graphemes, words, or sentences, ideal for handling complex cases like multi-character emojis or language-specific boundaries.
 
 ```typescript
 import { SegmentString } from "segment-string";
@@ -138,6 +138,10 @@ Returns the sentence at a specific index, supporting negative indices.
 #### `rawSentenceAt(index: number, options?: SegmentationOptions): Intl.SegmentData | undefined`
 
 Returns the raw sentence data at a specific index, supporting negative indices.
+
+### `[Symbol.iterator](): Iterator<string>`
+
+Returns an iterator over the graphemes of the string.
 
 ---
 
