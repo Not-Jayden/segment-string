@@ -15,7 +15,7 @@
 
 ## Key Features
 
-- **Intuitive `Intl.Segmenter` Wrapper**: Simplifies text segmentation with a clean API.
+- **Intuitive [`Intl.Segmenter`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter) Wrapper**: Simplifies text segmentation with a clean API.
 - **Standards-Based**: Built on native `Intl.Segmenter` for robust compatibility.
 - **Lightweight & Tree-Shakeable**: Minimal footprint with optimal bundling (836B minified + gzipped).
 - **Highly Performant**: Uses iterators for efficient, on-demand processing.
