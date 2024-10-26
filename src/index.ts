@@ -186,7 +186,7 @@ export function segmentCount<TGranularity extends Granularity>(
  * @param options - Options for segmentation.
  * @returns The segment at the specified index, or `undefined` if out of bounds.
  */
-function rawSegmentAt<TGranularity extends Granularity>(
+export function rawSegmentAt<TGranularity extends Granularity>(
 	str: string,
 	index: number,
 	granularity: TGranularity,
