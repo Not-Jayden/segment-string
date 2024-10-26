@@ -1,6 +1,6 @@
 {
 	"name": "segment-string",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "A lightweight wrapper around Intl.Segmenter for segment-aware string operations",
 	"repository": {
 		"type": "git",

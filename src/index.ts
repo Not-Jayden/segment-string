@@ -177,6 +177,41 @@ export function segmentCount<TGranularity extends Granularity>(
 }
 
 /**
+ * Returns the raw segment at a specific index in the string.
+ * Supports negative indices (e.g., -1 for the last segment).
+ * Supports additional options for 'word' granularity.
+ * @param str - The string to segment.
+ * @param index - Index of the desired segment (can be negative).
+ * @param granularity - Level of segmentation.
+ * @param options - Options for segmentation.
+ * @returns The segment at the specified index, or `undefined` if out of bounds.
+ */
+function rawSegmentAt<TGranularity extends Granularity>(
+	str: string,
+	index: number,
+	granularity: TGranularity,
+	options: SegmentationOptions<TGranularity> = {},
+): Intl.SegmentData | undefined {
+	const segments = getRawSegments(str, granularity, options);
+
+	if (index < 0) {
+		return [...segments].at(index);
+	}
+
+	let currentIndex = 0;
+
+	for (const segmentData of segments) {
+		if (index === currentIndex) {
+			return segmentData;
+		}
+
+		currentIndex++;
+	}
+
+	return undefined;
+}
+
+/**
  * Returns the segment at a specific index in the string.
  * Supports negative indices (e.g., -1 for the last segment).
  * Supports additional options for 'word' granularity.
@@ -192,23 +227,7 @@ export function segmentAt<TGranularity extends Granularity>(
 	granularity: TGranularity,
 	options: SegmentationOptions<TGranularity> = {},
 ): string | undefined {
-	const segments = getSegments(str, granularity, options);
-
-	if (index < 0) {
-		return [...segments].at(index);
-	}
-
-	let currentIndex = 0;
-
-	for (const segment of segments) {
-		if (index === currentIndex) {
-			return segment;
-		}
-
-		currentIndex++;
-	}
-
-	return undefined;
+	return rawSegmentAt(str, index, granularity, options)?.segment;
 }
 
 /**
@@ -296,6 +315,26 @@ export class SegmentString {
 		});
 	}
 
+	/**
+	 * Returns the raw segment at a specified index for the given granularity and options
+	 * Supoports additional options for 'word' granularity.
+	 * @param index - Index of the desired segment (can be negative).
+	 * @param granularity - Level of segmentation.
+	 * @param options - Options for segmentation.
+	 * @returns The raw segment data at the specified index, or `undefined` if out of bounds.
+	 * */
+	rawSegmentAt<TGranularity extends Granularity>(
+		index: number,
+		granularity: TGranularity,
+		options: SegmentationOptions<TGranularity> = {},
+	): Intl.SegmentData | undefined {
+		const locales = options.locales ?? this.locales;
+		return rawSegmentAt(this.str, index, granularity, {
+			...options,
+			locales,
+		});
+	}
+
 	/** Returns an iterable of graphemes based on the options. */
 	graphemes(options: SegmentationOptionsBase = {}): Iterable<string> {
 		return this.segments("grapheme", options);
@@ -319,6 +358,14 @@ export class SegmentString {
 		options: SegmentationOptionsBase = {},
 	): string | undefined {
 		return this.segmentAt(index, "grapheme", options);
+	}
+
+	/** Returns the raw grapheme at a specific index for the given options. */
+	rawGraphemeAt(
+		index: number,
+		options: SegmentationOptionsBase = {},
+	): Intl.SegmentData | undefined {
+		return this.rawSegmentAt(index, "grapheme", options);
 	}
 
 	/**
@@ -361,6 +408,14 @@ export class SegmentString {
 		return this.segmentAt(index, "word", options);
 	}
 
+	/** Returns the raw word at a specific index for the given options. */
+	rawWordAt(
+		index: number,
+		options: WordSegmentationOptions = {},
+	): Intl.SegmentData | undefined {
+		return this.rawSegmentAt(index, "word", options);
+	}
+
 	/** Returns an iterable of sentences based on the options. */
 	sentences(options: SegmentationOptionsBase = {}): Iterable<string> {
 		return this.segments("sentence", options);
@@ -384,6 +439,14 @@ export class SegmentString {
 		options: SegmentationOptionsBase = {},
 	): string | undefined {
 		return this.segmentAt(index, "sentence", options);
+	}
+
+	/** Returns the raw sentence at a specific index for the given options. */
+	rawSentenceAt(
+		index: number,
+		options: SegmentationOptionsBase = {},
+	): Intl.SegmentData | undefined {
+		return this.rawSegmentAt(index, "sentence", options);
 	}
 
 	[Symbol.iterator](): Iterator<string> {
