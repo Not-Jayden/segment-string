@@ -90,9 +90,9 @@ export function getRawSegments<TGranularity extends Granularity>(
 		(options as WordSegmentationOptions).isWordLike
 	) {
 		return filterRawWordLikeSegments(segments);
-	} else {
-		return segments;
 	}
+
+	return segments;
 }
 
 /**

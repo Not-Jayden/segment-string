@@ -172,32 +172,4 @@ console.log(secondWord);
 
 ---
 
-## Benefits Over Direct `Intl.Segmenter` Usage
-
-Using `segment-string` provides significant benefits over directly working with `Intl.Segmenter`:
-
-- **Simple API**: Simplifies `Intl.Segmenter` usage with an easy-to-use API for segmentation, counting, and retrieval at specific indices.
-- **Efficient Caching**: Automatically caches segmenters by locale and granularity, improving performance and avoiding unnecessary re-creation.
-- **Advanced Options**: Provides options such as `isWordLike` for word segments, not natively available in `Intl.Segmenter`.
-- **Locale-Aware**: Enables locale overrides per operation, allowing for flexible, multilingual segmentation.
-
----
-
-## Contributors
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Not-Jayden"><img src="https://avatars.githubusercontent.com/u/16816250?v=4?s=100" width="100px;" alt="Jayden Carey"/><br /><sub><b>Jayden Carey</b></sub></a><br /><a href="https://github.com/Not-Jayden/segment-string/commits?author=Not-Jayden" title="Code">💻</a> <a href="#content-Not-Jayden" title="Content">🖋</a> <a href="https://github.com/Not-Jayden/segment-string/commits?author=Not-Jayden" title="Documentation">📖</a> <a href="#ideas-Not-Jayden" title="Ideas, Planning, & Feedback">🤔</a> <a href="#infra-Not-Jayden" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#maintenance-Not-Jayden" title="Maintenance">🚧</a> <a href="#projectManagement-Not-Jayden" title="Project Management">📆</a> <a href="#tool-Not-Jayden" title
-
-="Tools">🔧</a></td>
-
-<td align="center" valign="top" width="14.28%"><a href="http://www.joshuakgoldberg.com/"><img src="https://avatars.githubusercontent.com/u/3335181?v=4?s=100" width="100px;" alt="Josh Goldberg ✨"/><br /><sub><b>Josh Goldberg ✨</b></sub></a><br /><a href="#tool-JoshuaKGoldberg" title="Tools">🔧</a></td>
-</tr>
-
-  </tbody>
-</table>
-
----
-
 > 💙 This package was templated with [`create-typescript-app`](https://github.com/JoshuaKGoldberg/create-typescript-app).
