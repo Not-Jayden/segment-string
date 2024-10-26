@@ -17,7 +17,7 @@
 
 - **Intuitive `Intl.Segmenter` Wrapper**: Simplifies text segmentation with a clean API.
 - **Standards-Based**: Built on native `Intl.Segmenter` for robust compatibility.
-- **Lightweight & Tree-Shakeable**: Minimal footprint with optimal bundling.
+- **Lightweight & Tree-Shakeable**: Minimal footprint with optimal bundling (836B minified + gzipped).
 - **Highly Performant**: Uses iterators for efficient, on-demand processing.
 - **Full TypeScript Support**: Strict types for safe, predictable usage.
 
