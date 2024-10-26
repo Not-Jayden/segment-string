@@ -1,150 +1,420 @@
-import { describe, it, expect } from "vitest";
+// Import the necessary functions and classes
 import {
+	getRawSegments,
 	getSegments,
 	segmentCount,
-	rawSegmentAt,
 	segmentAt,
 	SegmentString,
-	GraphemeString,
-	WordString,
-	SentenceString,
-} from "./index.js";
+} from "./index.js"; // Adjust the import path as needed
 
-describe("String Segmentation Utilities", () => {
-	const testString = "Hello, world! This is a test.";
-	const testLocales: Intl.LocalesArgument = "en-US";
+import { describe, it, expect } from "vitest";
+
+describe("Segmentation Functions", () => {
+	const testString = "Hello, world! こんにちは世界！";
+
+	describe("getRawSegments", () => {
+		it("should return raw grapheme segments", () => {
+			const segments = getRawSegments(testString, "grapheme");
+			const result = [...segments].map((s) => s.segment);
+			expect(result).toEqual([
+				"H",
+				"e",
+				"l",
+				"l",
+				"o",
+				",",
+				" ",
+				"w",
+				"o",
+				"r",
+				"l",
+				"d",
+				"!",
+				" ",
+				"こ",
+				"ん",
+				"に",
+				"ち",
+				"は",
+				"世",
+				"界",
+				"！",
+			]);
+		});
+
+		it("should return raw word segments without filtering", () => {
+			const segments = getRawSegments(testString, "word");
+			const result = [...segments].map((s) => s.segment);
+			expect(result).toEqual([
+				"Hello",
+				",",
+				" ",
+				"world",
+				"!",
+				" ",
+				"こんにちは",
+				"世界",
+				"！",
+			]);
+		});
+
+		it("should return raw word-like segments when isWordLike is true", () => {
+			const segments = getRawSegments(testString, "word", { isWordLike: true });
+			const result = [...segments].map((s) => s.segment);
+			expect(result).toEqual(["Hello", "world", "こんにちは", "世界"]);
+		});
+
+		it("should return raw sentence segments", () => {
+			const segments = getRawSegments(testString, "sentence");
+			const result = [...segments].map((s) => s.segment);
+			expect(result).toEqual(["Hello, world! ", "こんにちは世界！"]);
+		});
+	});
 
 	describe("getSegments", () => {
-		it("should segment a string by grapheme", () => {
-			const segments = Array.from(
-				getSegments(testString, "grapheme", testLocales),
-			);
-			expect(segments).toContain("H");
-			expect(segments.length).toBeGreaterThan(0);
+		it("should return grapheme segments", () => {
+			const segments = getSegments(testString, "grapheme");
+			const result = [...segments];
+			expect(result).toEqual([
+				"H",
+				"e",
+				"l",
+				"l",
+				"o",
+				",",
+				" ",
+				"w",
+				"o",
+				"r",
+				"l",
+				"d",
+				"!",
+				" ",
+				"こ",
+				"ん",
+				"に",
+				"ち",
+				"は",
+				"世",
+				"界",
+				"！",
+			]);
 		});
 
-		it("should segment a string by word", () => {
-			const segments = Array.from(getSegments(testString, "word", testLocales));
-			expect(segments).toContain("Hello");
-			expect(segments).toContain("world");
-			expect(segments.length).toBeGreaterThan(1);
+		it("should return word segments without filtering", () => {
+			const segments = getSegments(testString, "word");
+			const result = [...segments];
+			expect(result).toEqual([
+				"Hello",
+				",",
+				" ",
+				"world",
+				"!",
+				" こんにちは",
+				"世界",
+				"！",
+			]);
 		});
 
-		it("should segment a string by sentence", () => {
-			const segments = Array.from(
-				getSegments(testString, "sentence", testLocales),
-			);
-			expect(segments).toContain("Hello, world! ");
-			expect(segments).toContain("This is a test.");
-			expect(segments.length).toBeGreaterThan(1);
+		it("should return word-like segments when isWordLike is true", () => {
+			const segments = getSegments(testString, "word", { isWordLike: true });
+			const result = [...segments];
+			expect(result).toEqual(["Hello", "world", "こんにちは", "世界"]);
+		});
+
+		it("should return sentence segments", () => {
+			const segments = getSegments(testString, "sentence");
+			const result = [...segments];
+			expect(result).toEqual(["Hello, world! ", "こんにちは世界！"]);
 		});
 	});
 
 	describe("segmentCount", () => {
-		it("should return the correct count of segments", () => {
-			expect(segmentCount(testString, "grapheme", testLocales)).toBeGreaterThan(
-				0,
-			);
-			expect(segmentCount(testString, "word", testLocales)).toBe(14);
-			expect(segmentCount(testString, "sentence", testLocales)).toBe(2);
-		});
-	});
-
-	describe("rawSegmentAt", () => {
-		it("should return the correct segment data at the specified index", () => {
-			const segmentData = rawSegmentAt(testString, 3, "word", testLocales);
-			expect(segmentData).toBeDefined();
-			expect(segmentData?.segment).toBe("world");
+		it("should count grapheme segments", () => {
+			const count = segmentCount(testString, "grapheme");
+			expect(count).toBe(22);
 		});
 
-		it("should return undefined if the index is out of bounds", () => {
-			const segmentData = rawSegmentAt(testString, 100, "word", testLocales);
-			expect(segmentData).toBeUndefined();
+		it("should count word segments without filtering", () => {
+			const count = segmentCount(testString, "word");
+			expect(count).toBe(9);
+		});
+
+		it("should count word-like segments when isWordLike is true", () => {
+			const count = segmentCount(testString, "word", { isWordLike: true });
+			expect(count).toBe(4);
+		});
+
+		it("should count sentence segments", () => {
+			const count = segmentCount(testString, "sentence");
+			expect(count).toBe(2);
 		});
 	});
 
 	describe("segmentAt", () => {
-		it("should return the correct segment string at the specified index", () => {
-			const segment = segmentAt(testString, 3, "word", testLocales);
+		it("should return the grapheme at a specific index", () => {
+			const segment = segmentAt(testString, 0, "grapheme");
+			expect(segment).toBe("H");
+		});
+
+		it("should return the last grapheme using negative index", () => {
+			const segment = segmentAt(testString, -1, "grapheme");
+			expect(segment).toBe("！");
+		});
+
+		it("should return the word at a specific index without filtering", () => {
+			const segment = segmentAt(testString, 3, "word");
 			expect(segment).toBe("world");
 		});
 
-		it("should return undefined if the index is out of bounds", () => {
-			const segment = segmentAt(testString, 100, "word", testLocales);
+		it("should return the word-like segment at a specific index when isWordLike is true", () => {
+			const segment = segmentAt(testString, 1, "word", { isWordLike: true });
+			expect(segment).toBe("world");
+		});
+
+		it("should return undefined for out-of-bounds index", () => {
+			const segment = segmentAt(testString, 100, "word");
+			expect(segment).toBeUndefined();
+		});
+	});
+});
+
+describe("SegmentString Class", () => {
+	const rawTestString = "Hello, world! こんにちは世界！";
+	const testString = new SegmentString(rawTestString);
+
+	describe("graphemes", () => {
+		it("should return grapheme segments", () => {
+			const segments = testString.graphemes();
+			const result = [...segments];
+			expect(result).toEqual([
+				"H",
+				"e",
+				"l",
+				"l",
+				"o",
+				",",
+				" ",
+				"w",
+				"o",
+				"r",
+				"l",
+				"d",
+				"!",
+				" ",
+				"こ",
+				"ん",
+				"に",
+				"ち",
+				"は",
+				"世",
+				"界",
+				"！",
+			]);
+		});
+
+		it("should return the count of graphemes", () => {
+			const count = testString.graphemeCount();
+			expect(count).toBe(22);
+		});
+
+		it("should return the grapheme at a specific index", () => {
+			const segment = testString.graphemeAt(0);
+			expect(segment).toBe("H");
+		});
+
+		it("should return undefined for out-of-bounds index", () => {
+			const segment = testString.graphemeAt(100);
 			expect(segment).toBeUndefined();
 		});
 	});
 
-	describe("SegmentString Class", () => {
-		const segmentString = new SegmentString(testString, testLocales);
-
-		it("should return segments for a specific granularity", () => {
-			const segments = Array.from(segmentString.segments("word"));
-			expect(segments).toContain("Hello");
-			expect(segments).toContain("world");
+	describe("words", () => {
+		it("should return word segments without filtering", () => {
+			const segments = testString.words();
+			const result = [...segments];
+			expect(result).toEqual([
+				"Hello",
+				",",
+				" ",
+				"world",
+				"!",
+				" ",
+				"こんにちは",
+				"世界",
+				"！",
+			]);
 		});
 
-		it("should return the segment count for a given granularity", () => {
-			expect(segmentString.segmentCount("word")).toBe(14);
-			expect(segmentString.segmentCount("sentence")).toBe(2);
+		it("should return word-like segments when isWordLike is true", () => {
+			const segments = testString.words({ isWordLike: true });
+			const result = [...segments];
+			expect(result).toEqual(["Hello", "world", "こんにちは", "世界"]);
 		});
 
-		it("should return the segment at a specific index", () => {
-			expect(segmentString.segmentAt(3, "word")).toBe("world");
-		});
-	});
-
-	describe("GraphemeString Class", () => {
-		const graphemeString = new GraphemeString(testString, testLocales);
-
-		it("should return graphemes", () => {
-			const graphemes = Array.from(graphemeString.graphemes());
-			expect(graphemes.length).toBeGreaterThan(0);
+		it("should return the count of words without filtering", () => {
+			const count = testString.wordCount();
+			expect(count).toBe(9);
 		});
 
-		it("should return the grapheme count", () => {
-			expect(graphemeString.graphemeCount()).toBeGreaterThan(0);
+		it("should return the count of word-like segments when isWordLike is true", () => {
+			const count = testString.wordCount({ isWordLike: true });
+			expect(count).toBe(4);
 		});
 
-		it("should return the grapheme at a specific index", () => {
-			const grapheme = graphemeString.graphemeAt(0);
-			expect(grapheme).toBe("H");
-		});
-	});
-
-	describe("WordString Class", () => {
-		const wordString = new WordString(testString, testLocales);
-
-		it("should return words", () => {
-			const words = Array.from(wordString.words());
-			expect(words).toContain("Hello");
-			expect(words).toContain("world");
+		it("should return the word at a specific index without filtering", () => {
+			const segment = testString.wordAt(3);
+			expect(segment).toBe("world");
 		});
 
-		it("should return the word count", () => {
-			expect(wordString.wordCount()).toBe(14);
-		});
-
-		it("should return the word at a specific index", () => {
-			expect(wordString.wordAt(3)).toBe("world");
+		it("should return the word-like segment at a specific index when isWordLike is true", () => {
+			const segment = testString.wordAt(1, { isWordLike: true });
+			expect(segment).toBe("world");
 		});
 	});
 
-	describe("SentenceString Class", () => {
-		const sentenceString = new SentenceString(testString, testLocales);
-
-		it("should return sentences", () => {
-			const sentences = Array.from(sentenceString.sentences());
-			expect(sentences).toContain("Hello, world! ");
-			expect(sentences).toContain("This is a test.");
+	describe("sentences", () => {
+		it("should return sentence segments", () => {
+			const segments = testString.sentences();
+			const result = [...segments];
+			expect(result).toEqual(["Hello, world! ", "こんにちは世界！"]);
 		});
 
-		it("should return the sentence count", () => {
-			expect(sentenceString.sentenceCount()).toBe(2);
+		it("should return the count of sentences", () => {
+			const count = testString.sentenceCount();
+			expect(count).toBe(2);
 		});
 
 		it("should return the sentence at a specific index", () => {
-			expect(sentenceString.sentenceAt(0)).toBe("Hello, world! ");
+			const segment = testString.sentenceAt(0);
+			expect(segment).toBe("Hello, world! ");
+		});
+	});
+
+	describe("rawSegments", () => {
+		it("should return raw grapheme segments", () => {
+			const segments = testString.rawGraphemes();
+			const result = [...segments].map((s) => s.segment);
+			expect(result).toEqual([
+				"H",
+				"e",
+				"l",
+				"l",
+				"o",
+				",",
+				" ",
+				"w",
+				"o",
+				"r",
+				"l",
+				"d",
+				"!",
+				" ",
+				"こ",
+				"ん",
+				"に",
+				"ち",
+				"は",
+				"世",
+				"界",
+				"！",
+			]);
+		});
+
+		it("should return raw word segments without filtering", () => {
+			const segments = testString.rawWords();
+			const result = [...segments].map((s) => s.segment);
+			expect(result).toEqual([
+				"Hello",
+				",",
+				" ",
+				"world",
+				"!",
+				" ",
+				"こんにちは",
+				"世界",
+				"！",
+			]);
+		});
+
+		it("should return raw word-like segments when isWordLike is true", () => {
+			const segments = testString.rawWords({ isWordLike: true });
+			const result = [...segments].map((s) => s.segment);
+			expect(result).toEqual(["Hello", "world", "こんにちは", "世界"]);
+		});
+
+		it("should return raw sentence segments", () => {
+			const segments = testString.rawSentences();
+			const result = [...segments].map((s) => s.segment);
+			expect(result).toEqual(["Hello, world! ", "こんにちは世界！"]);
+		});
+	});
+
+	describe("toString and Symbol.toPrimitive", () => {
+		it("should return the original string using toString", () => {
+			expect(testString.toString()).toBe("Hello, world! こんにちは世界！");
+		});
+
+		it("should return the original string when used in a template literal", () => {
+			expect(`${testString}`).toBe("Hello, world! こんにちは世界！");
+		});
+
+		it("should return NaN when coerced to a number", () => {
+			expect(+testString).toBeNaN();
+		});
+	});
+
+	describe("Iteration", () => {
+		it("should be iterable over graphemes by default", () => {
+			const result = [...testString];
+			expect(result).toEqual([
+				"H",
+				"e",
+				"l",
+				"l",
+				"o",
+				",",
+				" ",
+				"w",
+				"o",
+				"r",
+				"l",
+				"d",
+				"!",
+				" ",
+				"こ",
+				"ん",
+				"に",
+				"ち",
+				"は",
+				"世",
+				"界",
+				"！",
+			]);
+		});
+	});
+
+	describe("Locales Override", () => {
+		it("should respect the locales override in options", () => {
+			const segmentString = new SegmentString("colour", "en-US");
+			const segments = segmentString.words({ localesOverride: "en-GB" });
+			const result = [...segments];
+			expect(result).toEqual(["colour"]); // Should segment correctly in en-GB
+		});
+	});
+
+	describe("Edge Cases", () => {
+		it("should handle empty strings", () => {
+			const emptyString = new SegmentString("");
+			expect([...emptyString.graphemes()]).toEqual([]);
+			expect(emptyString.graphemeCount()).toBe(0);
+			expect(emptyString.graphemeAt(0)).toBeUndefined();
+		});
+
+		it("should handle strings with emojis and complex characters", () => {
+			const emojiString = new SegmentString("👨‍👩‍👧‍👦 family");
+			const graphemes = [...emojiString.graphemes()];
+			expect(graphemes).toEqual(["👨‍👩‍👧‍👦", " ", "f", "a", "m", "i", "l", "y"]);
 		});
 	});
 });

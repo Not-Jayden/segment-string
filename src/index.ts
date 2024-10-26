@@ -47,57 +47,40 @@ function getCachedSegmenter(
 	return segmenter;
 }
 
-/** Options for segmentation methods. */
-type SegmentationOptions = {
+/** Base options for segmentation methods. */
+type SegmentationOptionsBase = {
 	/** Optional locales to override the default locale for segmentation. */
 	localesOverride?: Intl.LocalesArgument;
 };
 
 /** Options specific to word segmentation methods. */
-type WordSegmentationOptions = SegmentationOptions & {
+type WordSegmentationOptions = SegmentationOptionsBase & {
 	/** If true, filters segments to include only "word-like" segments. */
 	isWordLike?: boolean;
 };
 
 /**
+ * Segmentation options depending on the granularity.
+ * If TGranularity is 'word', returns WordSegmentationOptions; otherwise, SegmentationOptionsBase.
+ */
+type SegmentationOptions<TGranularity extends Granularity> =
+	TGranularity extends "word"
+		? WordSegmentationOptions
+		: SegmentationOptionsBase;
+
+/**
  * Returns the raw segments of a string based on the specified granularity and options.
  * Supports additional options for 'word' granularity.
- * @param str - The string to segment.
- * @param granularity - Level of segmentation ('word').
- * @param options - Options for word segmentation.
- * @returns An iterable of `Intl.SegmentData` representing the raw segments.
- */
-export function getRawSegments(
-	str: string,
-	granularity: "word",
-	options?: WordSegmentationOptions,
-): Iterable<Intl.SegmentData>;
-
-/**
- * Returns the raw segments of a string based on the specified granularity and options.
- * @param str - The string to segment.
- * @param granularity - Level of segmentation ('grapheme' or 'sentence').
- * @param options - Options for segmentation.
- * @returns An iterable of `Intl.SegmentData` representing the raw segments.
- */
-export function getRawSegments(
-	str: string,
-	granularity: Exclude<Granularity, "word">,
-	options?: SegmentationOptions,
-): Intl.Segments;
-
-/**
- * Returns the raw segments of a string based on the specified granularity and options.
  * @param str - The string to segment.
  * @param granularity - Level of segmentation.
  * @param options - Options for segmentation.
  * @returns An iterable of `Intl.SegmentData` representing the raw segments.
  */
-export function getRawSegments(
+export function getRawSegments<TGranularity extends Granularity>(
 	str: string,
-	granularity: Granularity,
-	options: SegmentationOptions | WordSegmentationOptions = {},
-): Intl.Segments | Iterable<Intl.SegmentData> {
+	granularity: TGranularity,
+	options: SegmentationOptions<TGranularity> = {},
+): Iterable<Intl.SegmentData> {
 	const locales = options.localesOverride;
 	const segmenter = getCachedSegmenter(locales, granularity);
 	const segments = segmenter.segment(str);
@@ -116,40 +99,14 @@ export function getRawSegments(
  * Segments a string based on specified granularity and options.
  * Supports additional options for 'word' granularity.
  * @param str - The string to segment.
- * @param granularity - Level of segmentation ('word').
- * @param options - Options for word segmentation.
- * @returns An iterable of segments as strings.
- */
-export function getSegments(
-	str: string,
-	granularity: "word",
-	options?: WordSegmentationOptions,
-): Iterable<string>;
-
-/**
- * Segments a string based on specified granularity and options.
- * @param str - The string to segment.
- * @param granularity - Level of segmentation ('grapheme' or 'sentence').
- * @param options - Options for segmentation.
- * @returns An iterable of segments as strings.
- */
-export function getSegments(
-	str: string,
-	granularity: Exclude<Granularity, "word">,
-	options?: SegmentationOptions,
-): Iterable<string>;
-
-/**
- * Segments a string based on specified granularity and options.
- * @param str - The string to segment.
  * @param granularity - Level of segmentation.
  * @param options - Options for segmentation.
  * @returns An iterable of segments as strings.
  */
-export function getSegments(
+export function getSegments<TGranularity extends Granularity>(
 	str: string,
-	granularity: Granularity,
-	options: SegmentationOptions | WordSegmentationOptions = {},
+	granularity: TGranularity,
+	options: SegmentationOptions<TGranularity> = {},
 ): Iterable<string> {
 	const segments = getRawSegments(str, granularity, options);
 
@@ -167,7 +124,7 @@ export function getSegments(
  * @returns An iterable of `Intl.SegmentData` for each word-like segment.
  */
 export function filterRawWordLikeSegments(
-	segments: Intl.Segments,
+	segments: Iterable<Intl.SegmentData>,
 ): Iterable<Intl.SegmentData> {
 	return (function* () {
 		for (const segmentData of segments) {
@@ -185,7 +142,7 @@ export function filterRawWordLikeSegments(
  * @returns An iterable of strings for each word-like segment.
  */
 export function filterWordLikeSegments(
-	segments: Intl.Segments,
+	segments: Iterable<Intl.SegmentData>,
 ): Iterable<string> {
 	return (function* () {
 		for (const segmentData of segments) {
@@ -200,40 +157,14 @@ export function filterWordLikeSegments(
  * Returns the number of segments in a string for the given granularity and options.
  * Supports additional options for 'word' granularity.
  * @param str - The string to segment.
- * @param granularity - Level of segmentation ('word').
- * @param options - Options for word segmentation.
- * @returns The number of segments.
- */
-export function segmentCount(
-	str: string,
-	granularity: "word",
-	options: WordSegmentationOptions,
-): number;
-
-/**
- * Returns the number of segments in a string for the given granularity and options.
- * @param str - The string to segment.
- * @param granularity - Level of segmentation ('grapheme' or 'sentence').
- * @param options - Options for segmentation.
- * @returns The number of segments.
- */
-export function segmentCount(
-	str: string,
-	granularity: Exclude<Granularity, "word">,
-	options?: SegmentationOptions,
-): number;
-
-/**
- * Returns the number of segments in a string for the given granularity and options.
- * @param str - The string to segment.
  * @param granularity - Level of segmentation.
  * @param options - Options for segmentation.
  * @returns The number of segments.
  */
-export function segmentCount(
+export function segmentCount<TGranularity extends Granularity>(
 	str: string,
-	granularity: Granularity,
-	options: SegmentationOptions | WordSegmentationOptions = {},
+	granularity: TGranularity,
+	options: SegmentationOptions<TGranularity> = {},
 ): number {
 	let count = 0;
 
@@ -250,47 +181,15 @@ export function segmentCount(
  * Supports additional options for 'word' granularity.
  * @param str - The string to segment.
  * @param index - Index of the desired segment (can be negative).
- * @param granularity - Level of segmentation ('word').
- * @param options - Options for word segmentation.
- * @returns The segment at the specified index, or `undefined` if out of bounds.
- */
-export function segmentAt(
-	str: string,
-	index: number,
-	granularity: "word",
-	options: WordSegmentationOptions,
-): string | undefined;
-
-/**
- * Returns the segment at a specific index in the string.
- * Supports negative indices (e.g., -1 for the last segment).
- * @param str - The string to segment.
- * @param index - Index of the desired segment (can be negative).
- * @param granularity - Level of segmentation ('grapheme' or 'sentence').
- * @param options - Options for segmentation.
- * @returns The segment at the specified index, or `undefined` if out of bounds.
- */
-export function segmentAt(
-	str: string,
-	index: number,
-	granularity: Exclude<Granularity, "word">,
-	options?: SegmentationOptions,
-): string | undefined;
-
-/**
- * Returns the segment at a specific index in the string.
- * Supports negative indices (e.g., -1 for the last segment).
- * @param str - The string to segment.
- * @param index - Index of the desired segment (can be negative).
  * @param granularity - Level of segmentation.
  * @param options - Options for segmentation.
  * @returns The segment at the specified index, or `undefined` if out of bounds.
  */
-export function segmentAt(
+export function segmentAt<TGranularity extends Granularity>(
 	str: string,
 	index: number,
-	granularity: Granularity,
-	options: SegmentationOptions | WordSegmentationOptions = {},
+	granularity: TGranularity,
+	options: SegmentationOptions<TGranularity> = {},
 ): string | undefined {
 	const segments = getSegments(str, granularity, options);
 
@@ -328,74 +227,30 @@ export class SegmentString {
 	/**
 	 * Segments the string based on specified granularity and options.
 	 * Supports additional options for 'word' granularity.
-	 * @param granularity - Level of segmentation ('word').
-	 * @param options - Options for word segmentation.
-	 * @returns An iterable of segments as strings.
-	 */
-	segments(
-		granularity: "word",
-		options: WordSegmentationOptions,
-	): Iterable<string>;
-
-	/**
-	 * Segments the string based on specified granularity and options.
-	 * @param granularity - Level of segmentation ('grapheme' or 'sentence').
-	 * @param options - Options for segmentation.
-	 * @returns An iterable of segments as strings.
-	 */
-	segments(
-		granularity: Exclude<Granularity, "word">,
-		options?: SegmentationOptions,
-	): Iterable<string>;
-
-	/**
-	 * Segments the string based on specified granularity and options.
 	 * @param granularity - Level of segmentation.
 	 * @param options - Options for segmentation.
 	 * @returns An iterable of segments as strings.
 	 */
-	segments(
-		granularity: Granularity,
-		options: SegmentationOptions | WordSegmentationOptions = {},
+	segments<TGranularity extends Granularity>(
+		granularity: TGranularity,
+		options: SegmentationOptions<TGranularity> = {},
 	): Iterable<string> {
-		const { localesOverride = this.locales } = options;
+		const localesOverride = options.localesOverride ?? this.locales;
 		return getSegments(this.str, granularity, { ...options, localesOverride });
 	}
 
 	/**
 	 * Returns raw segments of the string based on the specified granularity and options.
 	 * Supports additional options for 'word' granularity.
-	 * @param granularity - Level of segmentation ('word').
-	 * @param options - Options for word segmentation.
-	 * @returns An iterable of `Intl.SegmentData` representing the raw segments.
-	 */
-	rawSegments(
-		granularity: "word",
-		options: WordSegmentationOptions,
-	): Iterable<Intl.SegmentData>;
-
-	/**
-	 * Returns raw segments of the string based on the specified granularity and options.
-	 * @param granularity - Level of segmentation ('grapheme' or 'sentence').
-	 * @param options - Options for segmentation.
-	 * @returns An iterable of `Intl.SegmentData` representing the raw segments.
-	 */
-	rawSegments(
-		granularity: Exclude<Granularity, "word">,
-		options?: SegmentationOptions,
-	): Intl.Segments;
-
-	/**
-	 * Returns raw segments of the string based on the specified granularity and options.
 	 * @param granularity - Level of segmentation.
 	 * @param options - Options for segmentation.
 	 * @returns An iterable of `Intl.SegmentData` representing the raw segments.
 	 */
-	rawSegments(
-		granularity: Granularity,
-		options: SegmentationOptions | WordSegmentationOptions = {},
-	): Intl.Segments | Iterable<Intl.SegmentData> {
-		const { localesOverride = this.locales } = options;
+	rawSegments<TGranularity extends Granularity>(
+		granularity: TGranularity,
+		options: SegmentationOptions<TGranularity> = {},
+	): Iterable<Intl.SegmentData> {
+		const localesOverride = options.localesOverride ?? this.locales;
 		return getRawSegments(this.str, granularity, {
 			...options,
 			localesOverride,
@@ -405,34 +260,15 @@ export class SegmentString {
 	/**
 	 * Returns the count of segments based on granularity and options.
 	 * Supports additional options for 'word' granularity.
-	 * @param granularity - Level of segmentation ('word').
-	 * @param options - Options for word segmentation.
-	 * @returns The number of segments.
-	 */
-	segmentCount(granularity: "word", options: WordSegmentationOptions): number;
-
-	/**
-	 * Returns the count of segments based on granularity and options.
-	 * @param granularity - Level of segmentation ('grapheme' or 'sentence').
-	 * @param options - Options for segmentation.
-	 * @returns The number of segments.
-	 */
-	segmentCount(
-		granularity: Exclude<Granularity, "word">,
-		options?: SegmentationOptions,
-	): number;
-
-	/**
-	 * Returns the count of segments based on granularity and options.
 	 * @param granularity - Level of segmentation.
 	 * @param options - Options for segmentation.
 	 * @returns The number of segments.
 	 */
-	segmentCount(
-		granularity: Granularity,
-		options: SegmentationOptions | WordSegmentationOptions = {},
+	segmentCount<TGranularity extends Granularity>(
+		granularity: TGranularity,
+		options: SegmentationOptions<TGranularity> = {},
 	): number {
-		const { localesOverride = this.locales } = options;
+		const localesOverride = options.localesOverride ?? this.locales;
 		return segmentCount(this.str, granularity, { ...options, localesOverride });
 	}
 
@@ -440,42 +276,16 @@ export class SegmentString {
 	 * Returns the segment at a specified index for the given granularity and options.
 	 * Supports additional options for 'word' granularity.
 	 * @param index - Index of the desired segment (can be negative).
-	 * @param granularity - Level of segmentation ('word').
-	 * @param options - Options for word segmentation.
-	 * @returns The segment at the specified index, or `undefined` if out of bounds.
-	 */
-	segmentAt(
-		index: number,
-		granularity: "word",
-		options: WordSegmentationOptions,
-	): string | undefined;
-
-	/**
-	 * Returns the segment at a specified index for the given granularity and options.
-	 * @param index - Index of the desired segment (can be negative).
-	 * @param granularity - Level of segmentation ('grapheme' or 'sentence').
-	 * @param options - Options for segmentation.
-	 * @returns The segment at the specified index, or `undefined` if out of bounds.
-	 */
-	segmentAt(
-		index: number,
-		granularity: Exclude<Granularity, "word">,
-		options?: SegmentationOptions,
-	): string | undefined;
-
-	/**
-	 * Returns the segment at a specified index for the given granularity and options.
-	 * @param index - Index of the desired segment (can be negative).
 	 * @param granularity - Level of segmentation.
 	 * @param options - Options for segmentation.
 	 * @returns The segment at the specified index, or `undefined` if out of bounds.
 	 */
-	segmentAt(
+	segmentAt<TGranularity extends Granularity>(
 		index: number,
-		granularity: Granularity,
-		options: SegmentationOptions | WordSegmentationOptions = {},
+		granularity: TGranularity,
+		options: SegmentationOptions<TGranularity> = {},
 	): string | undefined {
-		const { localesOverride = this.locales } = options;
+		const localesOverride = options.localesOverride ?? this.locales;
 		return segmentAt(this.str, index, granularity, {
 			...options,
 			localesOverride,
@@ -483,24 +293,26 @@ export class SegmentString {
 	}
 
 	/** Returns an iterable of graphemes based on the options. */
-	graphemes(options: SegmentationOptions = {}): Iterable<string> {
+	graphemes(options: SegmentationOptionsBase = {}): Iterable<string> {
 		return this.segments("grapheme", options);
 	}
 
 	/** Returns raw grapheme segments of the string based on the specified options. */
-	rawGraphemes(options: SegmentationOptions = {}): Intl.Segments {
+	rawGraphemes(
+		options: SegmentationOptionsBase = {},
+	): Iterable<Intl.SegmentData> {
 		return this.rawSegments("grapheme", options);
 	}
 
 	/** Returns the count of graphemes for the specified options. */
-	graphemeCount(options: SegmentationOptions = {}): number {
+	graphemeCount(options: SegmentationOptionsBase = {}): number {
 		return this.segmentCount("grapheme", options);
 	}
 
 	/** Returns the grapheme at a specific index for the given options. */
 	graphemeAt(
 		index: number,
-		options: SegmentationOptions = {},
+		options: SegmentationOptionsBase = {},
 	): string | undefined {
 		return this.segmentAt(index, "grapheme", options);
 	}
@@ -546,24 +358,26 @@ export class SegmentString {
 	}
 
 	/** Returns an iterable of sentences based on the options. */
-	sentences(options: SegmentationOptions = {}): Iterable<string> {
+	sentences(options: SegmentationOptionsBase = {}): Iterable<string> {
 		return this.segments("sentence", options);
 	}
 
 	/** Returns raw sentence segments of the string based on the specified options. */
-	rawSentences(options: SegmentationOptions = {}): Intl.Segments {
+	rawSentences(
+		options: SegmentationOptionsBase = {},
+	): Iterable<Intl.SegmentData> {
 		return this.rawSegments("sentence", options);
 	}
 
 	/** Returns the count of sentences for the specified options. */
-	sentenceCount(options: SegmentationOptions = {}): number {
+	sentenceCount(options: SegmentationOptionsBase = {}): number {
 		return this.segmentCount("sentence", options);
 	}
 
 	/** Returns the sentence at a specific index for the given options. */
 	sentenceAt(
 		index: number,
-		options: SegmentationOptions = {},
+		options: SegmentationOptionsBase = {},
 	): string | undefined {
 		return this.segmentAt(index, "sentence", options);
 	}
