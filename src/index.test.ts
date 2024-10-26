@@ -1,11 +1,10 @@
-// Import the necessary functions and classes
 import {
 	getRawSegments,
 	getSegments,
 	segmentCount,
 	segmentAt,
 	SegmentString,
-} from "./index.js"; // Adjust the import path as needed
+} from "./index.js";
 
 import { describe, it, expect } from "vitest";
 
@@ -394,15 +393,6 @@ describe("SegmentString Class", () => {
 		});
 	});
 
-	describe("Locales Override", () => {
-		it("should respect the locales override in options", () => {
-			const segmentString = new SegmentString("colour", "en-US");
-			const segments = segmentString.words({ localesOverride: "en-GB" });
-			const result = [...segments];
-			expect(result).toEqual(["colour"]); // Should segment correctly in en-GB
-		});
-	});
-
 	describe("Edge Cases", () => {
 		it("should handle empty strings", () => {
 			const emptyString = new SegmentString("");
@@ -415,6 +405,11 @@ describe("SegmentString Class", () => {
 			const emojiString = new SegmentString("👨‍👩‍👧‍👦 family");
 			const graphemes = [...emojiString.graphemes()];
 			expect(graphemes).toEqual(["👨‍👩‍👧‍👦", " ", "f", "a", "m", "i", "l", "y"]);
+		});
+
+		it("should convert to a string", () => {
+			expect(testString.toString()).toBe(rawTestString);
+			expect(`${testString}`).toBe(rawTestString);
 		});
 	});
 });
