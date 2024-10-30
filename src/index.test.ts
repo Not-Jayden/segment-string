@@ -6,6 +6,7 @@ import {
 	filterRawWordLikeSegments,
 	filterWordLikeSegments,
 	SegmentString,
+	SegmentSplitter,
 } from "./index.js";
 
 import { describe, it, expect } from "vitest";
@@ -434,5 +435,66 @@ describe("SegmentString Class", () => {
 			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 			expect(`${testString}`).toBe(rawTestString);
 		});
+	});
+});
+
+describe("SegmentSplitter Class", () => {
+	const testString = "Hello, world! こんにちは世界！";
+
+	it("should split the string by word", () => {
+		const wordSplitter = new SegmentSplitter("word");
+		const words = testString.split(wordSplitter);
+		expect(words).toEqual([
+			"Hello",
+			",",
+			" ",
+			"world",
+			"!",
+			" ",
+			"こんにちは",
+			"世界",
+			"！",
+		]);
+	});
+
+	it("should split the string by word-like words", () => {
+		const wordSplitter = new SegmentSplitter("word", { isWordLike: true });
+		const words = testString.split(wordSplitter);
+		expect(words).toEqual(["Hello", "world", "こんにちは", "世界"]);
+	});
+
+	it("should split the string by sentence", () => {
+		const sentenceSplitter = new SegmentSplitter("sentence");
+		const sentences = testString.split(sentenceSplitter);
+		expect(sentences).toEqual(["Hello, world! ", "こんにちは世界！"]);
+	});
+
+	it("should split the string by grapheme", () => {
+		const graphemeSplitter = new SegmentSplitter("grapheme");
+		const graphemes = testString.split(graphemeSplitter);
+		expect(graphemes).toEqual([
+			"H",
+			"e",
+			"l",
+			"l",
+			"o",
+			",",
+			" ",
+			"w",
+			"o",
+			"r",
+			"l",
+			"d",
+			"!",
+			" ",
+			"こ",
+			"ん",
+			"に",
+			"ち",
+			"は",
+			"世",
+			"界",
+			"！",
+		]);
 	});
 });
