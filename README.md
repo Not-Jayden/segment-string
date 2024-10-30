@@ -169,6 +169,30 @@ console.log(secondWord);
 
 ---
 
+## SegmentSplitter Class
+
+Alternatively, the `SegmentSplitter` class allows you to create an instance that can be directly used with JavaScript's `String.prototype.split` method for basic segmentation.
+
+### Constructor
+
+```typescript
+new SegmentSplitter<T extends Granularity>(granularity: T, options?: SegmentationOptions<T>);
+```
+
+- **granularity**: Specifies the segmentation granularity level (`'grapheme'`, `'word'`, `'sentence'`, etc.).
+- **options**: Optional settings to customize the segmentation for the given granularity.
+
+## Example Usage
+
+```typescript
+const str = "Hello, world!";
+const wordSplitter = new SegmentSplitter("word", { isWordLike: true });
+const words = str.split(wordSplitter);
+console.log(words); // ["Hello", "world"]
+```
+
+---
+
 ## Individual Functions
 
 ### `getRawSegments`

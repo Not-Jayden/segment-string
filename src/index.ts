@@ -461,3 +461,25 @@ export class SegmentString {
 		return this.str;
 	}
 }
+
+/**
+ * A class that implements the `Symbol.split` method to use segmentation for splitting strings.
+ *
+ * Example usage:
+ * ```ts
+ * const str = "Hello, world!";
+ * const wordSplitter = new SegmentSplitter("word", { isWordLike: true });
+ * const words = str.split(wordSplitter);
+ * console.log(words); // ["Hello", "world"]
+ * ```
+ */
+export class SegmentSplitter<T extends Granularity> {
+	constructor(
+		private readonly granularity: T,
+		private readonly options: SegmentationOptions<T> = {},
+	) {}
+
+	[Symbol.split](str: string): string[] {
+		return [...getSegments(str, this.granularity, this.options)];
+	}
+}
