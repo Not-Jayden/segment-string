@@ -6,6 +6,7 @@
 	<a href="#contributors" target="_blank"><img alt="👪 All Contributors: 2" src="https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-2-21bb42.svg" /></a>
 	<a href="https://github.com/Not-Jayden/segment-string/blob/main/.github/CODE_OF_CONDUCT.md" target="_blank"><img alt="🤝 Code of Conduct: Kept" src="https://img.shields.io/badge/%F0%9F%A4%9D_code_of_conduct-kept-21bb42" /></a>
 	<a href="https://codecov.io/gh/Not-Jayden/segment-string" target="_blank"><img alt="🧪 Coverage" src="https://img.shields.io/codecov/c/github/Not-Jayden/segment-string?label=%F0%9F%A7%AA%20coverage" /></a>
+	<a href="https://bundlejs.com/?q=segment-string" target="_blank"><img alt="📏" src="https://deno.bundlejs.com/badge?q=segment-string" /></a>
 	<a href="https://github.com/Not-Jayden/segment-string/blob/main/LICENSE.md" target="_blank"><img alt="📝 License: MIT" src="https://img.shields.io/badge/%F0%9F%93%9D_license-MIT-21bb42.svg"></a>
 	<a href="http://npmjs.com/package/segment-string"><img alt="📦 npm version" src="https://img.shields.io/npm/v/segment-string?color=21bb42&label=%F0%9F%93%A6%20npm" /></a>
 	<img alt="💪 TypeScript: Strict" src="https://img.shields.io/badge/%F0%9F%92%AA_typescript-strict-21bb42.svg" />
@@ -17,7 +18,7 @@
 
 - **Intuitive [`Intl.Segmenter`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter) Wrapper**: Simplifies text segmentation with a clean API.
 - **Standards-Based**: Built on native `Intl.Segmenter` for robust compatibility.
-- **Lightweight & Tree-Shakeable**: Minimal footprint with optimal bundling (836B minified + gzipped).
+- **Lightweight & Tree-Shakeable**: Minimal footprint with optimal bundling.
 - **Highly Performant**: Uses iterators for efficient, on-demand processing.
 - **Full TypeScript Support**: Strict types for safe, predictable usage.
 
